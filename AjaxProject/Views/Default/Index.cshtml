@@ -1,0 +1,92 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
+<h3 class="alert alert-primary">Ajax Ürün İşlemleri</h3>
+
+<button id="btnList" class="btn btn-outline-primary">Ürün Listesi</button>
+<button id="btnCreate" class="btn btn-outline-info">Ürün Ekle</button>
+<button id="btnDelete" class="btn btn-outline-danger">Ürün Sil</button>
+<button id="btnUpdate" class="btn btn-outline-success">Ürün Güncelle</button>
+<button id="btnGet" class="btn btn-outline-warning">Ürün Getir</button>
+
+<hr/>
+
+<div class="alert alert-dark">Ürün Listesi</div>
+<div id="productList">
+
+</div>
+
+<div class="alert alert-success">Yeni Ürün Girişi</div>
+<div>
+    <input type="text" placeholder="Ürün Adını Giriniz" id="productName" class="form-control"/>
+    <br/>
+    <input type="text" placeholder="Ürün Stok Sayısını Giriniz" id="productStock" class="form-control" />
+    <br />
+    <input type="text" placeholder="Ürün Fiyatını Giriniz" id="productPrice" class="form-control" />
+    <br />
+</div>
+
+<script>
+    $("#btnList").click(function () {
+        $.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            type: "GET",
+            url: "/Default/ProductList",
+            success: function (func1) {
+                let products = jQuery.parseJSON(func1);
+                // let products = func1;
+                console.log(products);
+
+                let tablehtml = "<table class=table table-bordered>"
+                    + "<tr>"
+                    + "<th>Ürün Id</th>"
+                    + "<th>Ürün Adı</th>"
+                    + "<th>Ürün Fiyat</th>"
+                    + "<th>Ürün Stok</th>"
+                    + "</tr>"
+                $.each(products, (index, value) => {
+                    tablehtml += `<tr>`
+                        + `<td>${value.ProductId}</td>`
+                        + `<td>${value.ProductName}</td>`
+                        + `<td>${value.Price}</td>`
+                        + `<td>${value.Stock}</td>`
+                        + `</tr>`
+                });
+                tablehtml += "</table>";
+                $("#productList").html(tablehtml);
+            }   
+        })
+    })
+
+    $("#btnCreate").click(function () {
+        let productName = $("#productName").val();
+        let productStock = $("#productStock").val();
+        let productPrice = $("#productPrice").val();
+
+        let product = {
+            ProductName: productName,
+            Stock: productStock,
+            Price: productPrice
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Default/CreateProduct/",
+            data: product,
+            success: function (funk2) {
+                let result = jQuery.parseJSON(funk2);
+                console.log(result);
+                swal("Ürün Kaydedildi!", "", "success");
+            }
+        })
+    })
+
+
+</script>
