@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Index";
 }
 
@@ -15,20 +14,48 @@
 <button id="btnUpdate" class="btn btn-outline-success">Ürün Güncelle</button>
 <button id="btnGet" class="btn btn-outline-warning">Ürün Getir</button>
 
-<hr/>
+<hr />
 
 <div class="alert alert-dark">Ürün Listesi</div>
 <div id="productList">
-
 </div>
+
+<hr />
 
 <div class="alert alert-success">Yeni Ürün Girişi</div>
 <div>
-    <input type="text" placeholder="Ürün Adını Giriniz" id="productName" class="form-control"/>
-    <br/>
+    <input type="text" placeholder="Ürün Adını Giriniz" id="productName" class="form-control" />
+    <br />
     <input type="text" placeholder="Ürün Stok Sayısını Giriniz" id="productStock" class="form-control" />
     <br />
     <input type="text" placeholder="Ürün Fiyatını Giriniz" id="productPrice" class="form-control" />
+    <br />
+</div>
+
+<hr />
+
+<div class="alert alert-danger">Ürün Silme Ekranı</div>
+<div>
+    <input type="text" placeholder="Silinecek ürünün ID'sini Giriniz" id="productIdDelete" class="form-control" />
+    <br />
+</div>
+
+<div class="alert alert-warning">Ürün Detayları Getirme Ekranı</div>
+<div>
+    <input type="text" placeholder="Ürün ID Giriniz" id="productIdGet" class="form-control" />
+    <br />
+
+</div>
+
+<div class="alert alert-success">Ürün Güncelleme Ekranı</div>
+<div>
+    <input type="text" placeholder="Ürün ID'sini Giriniz" id="productIdUpdate" class="form-control" />
+    <br />
+    <input type="text" placeholder="Ürün Adını Giriniz" id="productNameUpdate" class="form-control" />
+    <br />
+    <input type="text" placeholder="Ürün Stok Sayısını Giriniz" id="productStockUpdate" class="form-control" />
+    <br />
+    <input type="text" placeholder="Ürün Fiyatını Giriniz" id="productPriceUpdate" class="form-control" />
     <br />
 </div>
 
@@ -50,6 +77,7 @@
                     + "<th>Ürün Adı</th>"
                     + "<th>Ürün Fiyat</th>"
                     + "<th>Ürün Stok</th>"
+                    + "<th>Ürün Güncelle</th>"
                     + "</tr>"
                 $.each(products, (index, value) => {
                     tablehtml += `<tr>`
@@ -57,11 +85,12 @@
                         + `<td>${value.ProductName}</td>`
                         + `<td>${value.Price}</td>`
                         + `<td>${value.Stock}</td>`
+                        + `<td><button id="btnGetById" class="btn btn-outline-success">Ürün Güncelle</button></td>`
                         + `</tr>`
                 });
                 tablehtml += "</table>";
                 $("#productList").html(tablehtml);
-            }   
+            }
         })
     })
 
@@ -84,9 +113,120 @@
                 let result = jQuery.parseJSON(funk2);
                 console.log(result);
                 swal("Ürün Kaydedildi!", "", "success");
+
+                //Ürün Listelemek İçin
+                $.ajax({
+                    contentType: "application/json",
+                    dataType: "json",
+                    type: "GET",
+                    url: "/Default/ProductList",
+                    success: function (func1) {
+                        let products = jQuery.parseJSON(func1);
+                        // let products = func1;
+                        console.log(products);
+
+                        let tablehtml = "<table class=table table-bordered>"
+                            + "<tr>"
+                            + "<th>Ürün Id</th>"
+                            + "<th>Ürün Adı</th>"
+                            + "<th>Ürün Fiyat</th>"
+                            + "<th>Ürün Stok</th>"
+                            + "</tr>"
+                        $.each(products, (index, value) => {
+                            tablehtml += `<tr>`
+                                + `<td>${value.ProductId}</td>`
+                                + `<td>${value.ProductName}</td>`
+                                + `<td>${value.Price}</td>`
+                                + `<td>${value.Stock}</td>`
+                                + `</tr>`
+                        });
+                        tablehtml += "</table>";
+                        $("#productList").html(tablehtml);
+                    }
+                })
             }
         })
     })
 
+    $("#btnDelete").click(function () {
+        let productId = $("#productIdDelete").val()
 
+        $.ajax({
+            type: "Post",
+            url: "/Default/DeleteProduct/",
+            data: productId,
+            success: function () {
+
+                swal("Ürün Silindi!", "", "success")
+
+                //Ürün Listelemek İçin
+                $.ajax({
+                    contentType: "application/json",
+                    dataType: "json",
+                    type: "GET",
+                    url: "/Default/ProductList",
+                    success: function (func1) {
+                        let products = jQuery.parseJSON(func1);
+                        // let products = func1;
+                        console.log(products);
+
+                        let tablehtml = "<table class=table table-bordered>"
+                            + "<tr>"
+                            + "<th>Ürün Id</th>"
+                            + "<th>Ürün Adı</th>"
+                            + "<th>Ürün Fiyat</th>"
+                            + "<th>Ürün Stok</th>"
+                            + "</tr>"
+                        $.each(products, (index, value) => {
+                            tablehtml += `<tr>`
+                                + `<td>${value.ProductId}</td>`
+                                + `<td>${value.ProductName}</td>`
+                                + `<td>${value.Price}</td>`
+                                + `<td>${value.Stock}</td>`
+                                + `</tr>`
+                        });
+                        tablehtml += "</table>";
+                        $("#productList").html(tablehtml);
+                    }
+                })
+            }
+        })
+    })
+
+    $("#btnGet").click(() => {
+        let id = $("#productIdGet").val()
+
+        $.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            url: "/Default/GetProduct/" + id,
+            success: (response) => {
+                let product = jQuery.parseJSON(response);
+                console.log(product);
+                swal(`Ürün adı: ${product.ProductName}` + "\n" + `Ürün Fiyatı: ${product.Price}`);
+            }
+        })
+    })
+
+    $("#btnUpdate").click(() => {
+        let productId = $("#productIdUpdate").val();
+        let productName = $("#productNameUpdate").val();
+        let productStock = $("#productStockUpdate").val();
+        let productPrice = $("#productPriceUpdate").val();
+
+        let product = {
+            ProductId: productId,
+            ProductName: productName,
+            Stock: productStock,
+            Price: productPrice
+        }
+        $.ajax({
+            url: "/Default/UpdateProduct/",
+            data: product,
+            method: "post",
+            success: (response) => {
+                swal("Ürün Güncellendi", "", "success")
+            }
+        })
+    })
 </script>
